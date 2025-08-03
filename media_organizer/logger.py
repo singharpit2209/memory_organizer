@@ -9,6 +9,13 @@ import logging
 import sys
 from typing import Optional
 
+try:
+    from tqdm import tqdm
+    TQDM_AVAILABLE = True
+except ImportError:
+    TQDM_AVAILABLE = False
+    logging.warning("tqdm not available. Progress bars will be disabled.")
+
 
 class Logger:
     """
@@ -167,4 +174,19 @@ class Logger:
             percentage = (current / total) * 100
             logger.info(f"{operation}: {current}/{total} ({percentage:.1f}%)")
         else:
-            logger.info(f"{operation}: {current} items") 
+            logger.info(f"{operation}: {current} items")
+    
+    def create_progress_bar(self, total: int, desc: str = "Processing") -> Optional['tqdm']:
+        """
+        Create a progress bar for tracking operations.
+        
+        Args:
+            total: Total number of items to process
+            desc: Description for the progress bar
+            
+        Returns:
+            tqdm progress bar instance or None if tqdm is not available
+        """
+        if TQDM_AVAILABLE and total > 0:
+            return tqdm(total=total, desc=desc, unit="files", ncols=80)
+        return None 

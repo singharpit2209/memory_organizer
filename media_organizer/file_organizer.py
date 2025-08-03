@@ -9,7 +9,7 @@ import os
 import shutil
 import logging
 from pathlib import Path
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Dict
 
 
 class FileOrganizer:
@@ -27,6 +27,9 @@ class FileOrganizer:
         """
         self.logger = logging.getLogger(__name__)
         self.destination_root = Path(destination_root)
+        
+        # Cache for created directories to avoid repeated mkdir calls
+        self._directory_cache = {}
         
         # Ensure destination root exists
         self.destination_root.mkdir(parents=True, exist_ok=True)
@@ -47,6 +50,13 @@ class FileOrganizer:
         safe_country = self._sanitize_filename(country)
         safe_state = self._sanitize_filename(state)
         
+        # Create cache key
+        cache_key = f"{safe_country}:{safe_state}"
+        
+        # Check cache first
+        if cache_key in self._directory_cache:
+            return self._directory_cache[cache_key]
+        
         # Special handling for Unknown location - create single Unknown folder
         if safe_country == "Unknown" and safe_state == "Unknown":
             location_path = self.destination_root / "Unknown"
@@ -56,11 +66,25 @@ class FileOrganizer:
         try:
             location_path.mkdir(parents=True, exist_ok=True)
             self.logger.debug(f"Created directory: {location_path}")
+            # Cache the result
+            self._directory_cache[cache_key] = location_path
             return location_path
         except Exception as e:
             self.logger.error(f"Failed to create directory {location_path}: {e}")
             # Fallback to Unknown directory
             return self.create_location_directory("Unknown", "Unknown")
+    
+    def get_directory_cache_stats(self) -> Dict[str, int]:
+        """
+        Get directory cache statistics.
+        
+        Returns:
+            Dictionary with cache statistics
+        """
+        return {
+            'cached_directories': len(self._directory_cache),
+            'cache_keys': list(self._directory_cache.keys())
+        }
     
     def copy_file(self, source_path: str, destination_path: Path) -> bool:
         """

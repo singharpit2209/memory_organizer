@@ -13,6 +13,10 @@ A Python tool for organizing media files by GPS location. This application extra
 - **Error Handling**: Robust error handling with fallback mechanisms
 - **Cross-Platform**: Works on Windows, macOS, and Linux
 - **Debug Tools**: Includes debug script for testing video GPS extraction capabilities
+- **High Performance**: Optimized for large datasets with caching, concurrent processing, and early filtering
+- **Progress Tracking**: Visual progress bars using tqdm for better user experience
+- **Smart Caching**: In-memory caching for geocoding results and directory creation
+- **Concurrent Processing**: Multi-threaded processing for faster execution of large datasets
 
 ## Supported File Formats
 
@@ -173,6 +177,7 @@ README.md                   # This file
 - **exifread**: Alternative EXIF data extraction
 - **hachoir**: Video metadata extraction
 - **geopy**: Reverse geocoding functionality
+- **tqdm**: Progress bars for better user experience
 
 ### Optional Dependencies
 - **requests**: HTTP requests for geocoding services

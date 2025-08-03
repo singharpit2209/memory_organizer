@@ -95,6 +95,60 @@ class MetadataExtractor:
             self.logger.warning(f"Unsupported file type: {file_path}")
             return None
     
+    def has_gps_data(self, file_path: str) -> bool:
+        """
+        Quick check if a file has GPS data without full extraction.
+        This is useful for early filtering of files without GPS data.
+        
+        Args:
+            file_path: Path to the media file
+            
+        Returns:
+            True if the file likely has GPS data, False otherwise
+        """
+        if not os.path.exists(file_path):
+            return False
+        
+        file_ext = Path(file_path).suffix.lower()
+        
+        # For images, check file size and basic EXIF presence
+        if file_ext in self.IMAGE_EXTENSIONS:
+            try:
+                file_size = os.path.getsize(file_path)
+                # Very small files unlikely to have GPS data
+                if file_size < 1024:  # Less than 1KB
+                    return False
+                
+                # Quick check for EXIF data using PIL
+                if PIL_AVAILABLE:
+                    with Image.open(file_path) as img:
+                        if hasattr(img, '_getexif') and img._getexif():
+                            return True
+                
+                # Fallback check with exifread
+                if EXIFREAD_AVAILABLE:
+                    with open(file_path, 'rb') as f:
+                        tags = exifread.process_file(f, details=False)
+                        return any('GPS' in tag for tag in tags.keys())
+                
+                return True  # Assume it might have GPS data
+                
+            except Exception:
+                return False
+        
+        # For videos, assume they might have GPS data (more complex to check quickly)
+        elif file_ext in self.VIDEO_EXTENSIONS:
+            try:
+                file_size = os.path.getsize(file_path)
+                # Very small video files unlikely to have GPS data
+                if file_size < 10240:  # Less than 10KB
+                    return False
+                return True  # Assume it might have GPS data
+            except Exception:
+                return False
+        
+        return False
+    
     def _extract_gps_from_image(self, file_path: str) -> Optional[Tuple[float, float]]:
         """
         Extract GPS coordinates from an image file using multiple methods.
