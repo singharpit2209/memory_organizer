@@ -122,8 +122,21 @@ class MetadataExtractor:
                 # Quick check for EXIF data using PIL
                 if PIL_AVAILABLE:
                     with Image.open(file_path) as img:
-                        if hasattr(img, '_getexif') and img._getexif():
-                            return True
+                        exif_data = img._getexif()
+                        if exif_data:
+                            # Check if GPS coordinates are actually present
+                            gps_info = {}
+                            for tag_id, value in exif_data.items():
+                                tag = TAGS.get(tag_id, tag_id)
+                                if tag == "GPSInfo":
+                                    for gps_tag_id, gps_value in value.items():
+                                        gps_tag = GPSTAGS.get(gps_tag_id, gps_tag_id)
+                                        gps_info[gps_tag] = gps_value
+                            
+                            # Only return True if we have actual coordinates
+                            if 'GPSLatitude' in gps_info and 'GPSLongitude' in gps_info:
+                                return True
+                            return False
                 
                 # Fallback check with exifread
                 if EXIFREAD_AVAILABLE:
@@ -136,14 +149,56 @@ class MetadataExtractor:
             except Exception:
                 return False
         
-        # For videos, assume they might have GPS data (more complex to check quickly)
+        # For videos, try to check for GPS data using available methods
         elif file_ext in self.VIDEO_EXTENSIONS:
             try:
                 file_size = os.path.getsize(file_path)
                 # Very small video files unlikely to have GPS data
                 if file_size < 10240:  # Less than 10KB
                     return False
-                return True  # Assume it might have GPS data
+                
+                # Try hachoir first (if available)
+                if HACHOIR_AVAILABLE:
+                    try:
+                        parser = createParser(file_path)
+                        if parser:
+                            with parser:
+                                metadata = extractMetadata(parser)
+                                if metadata:
+                                    # Check if metadata contains GPS-related fields
+                                    # Handle different metadata object types
+                                    if hasattr(metadata, 'keys'):
+                                        for key in metadata.keys():
+                                            if 'GPS' in str(key) or 'gps' in str(key) or 'location' in str(key).lower():
+                                                return True
+                                    else:
+                                        # For MP4Metadata and similar objects, check attributes
+                                        for attr_name in dir(metadata):
+                                            if not attr_name.startswith('_'):
+                                                if 'GPS' in attr_name or 'gps' in attr_name or 'location' in attr_name.lower():
+                                                    return True
+                    except Exception:
+                        pass
+                
+                # Try ffprobe if available
+                try:
+                    import subprocess
+                    result = subprocess.run(['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', file_path], 
+                                          capture_output=True, text=True, timeout=5)
+                    if result.returncode == 0:
+                        import json
+                        data = json.loads(result.stdout)
+                        if 'format' in data and 'tags' in data['format']:
+                            tags = data['format']['tags']
+                            for key in tags:
+                                if 'GPS' in key or 'gps' in key or 'location' in key.lower():
+                                    return True
+                except Exception:
+                    pass
+                
+                # If we can't check, be conservative and assume no GPS data
+                return False
+                
             except Exception:
                 return False
         
