@@ -1,0 +1,13 @@
+# Core dependencies for media organization
+Pillow>=9.0.0
+exifread>=3.0.0
+hachoir>=3.2.0
+geopy>=2.3.0
+
+# Optional dependencies for enhanced functionality
+requests>=2.28.0
+
+# Development dependencies (optional)
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=5.0.0 
