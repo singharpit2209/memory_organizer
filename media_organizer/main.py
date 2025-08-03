@@ -37,17 +37,17 @@ class MediaOrganizer:
     
     def get_user_input(self) -> tuple:
         """
-        Get user input for source directory, destination directory, and operation type.
+        Get user input for source directory, destination directory, operation type, and mode.
         
         Returns:
-            Tuple of (source_dir, dest_dir, operation)
+            Tuple of (source_dir, dest_dir, operation, mode)
         """
         print("\n" + "="*60)
         print("MEDIA ORGANIZER")
         print("="*60)
         print("This tool organizes media files by GPS location.")
         print("Files will be organized into Country/State folders based on GPS data.")
-        print("Files without GPS data will be placed in Unknown/Unknown folder.")
+        print("Files without GPS data will be placed in Unknown folder.")
         print("="*60)
         
         # Get source directory
@@ -80,7 +80,100 @@ class MediaOrganizer:
             else:
                 print("Error: Please enter 'copy' or 'move'.")
         
-        return source_dir, dest_dir, operation
+        # Get mode (plan or execute)
+        while True:
+            mode = input("Mode (plan/execute): ").strip().lower()
+            if mode in ['plan', 'execute']:
+                break
+            else:
+                print("Error: Please enter 'plan' or 'execute'.")
+        
+        return source_dir, dest_dir, operation, mode
+    
+    def plan_organization(self, source_dir: str, dest_dir: str) -> bool:
+        """
+        Plan the organization of media files without actually moving/copying them.
+        
+        Args:
+            source_dir: Source directory path
+            dest_dir: Destination directory path
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Initialize file organizer
+            self.file_organizer = FileOrganizer(dest_dir)
+            
+            # Scan for media files
+            self.log.info(f"Scanning directory: {source_dir}")
+            media_files = self.file_organizer.scan_directory(source_dir)
+            
+            if not media_files:
+                self.log.warning("No media files found in the source directory.")
+                return True
+            
+            self.log.info(f"Found {len(media_files)} media files to analyze")
+            
+            # Dictionary to track folder structure and file counts
+            folder_structure = {}
+            total_files = 0
+            
+            print("\n" + "="*60)
+            print("ORGANIZATION PLAN")
+            print("="*60)
+            
+            for i, file_path in enumerate(media_files, 1):
+                self.logger.log_progress(i, len(media_files), "Analyzing files")
+                
+                try:
+                    # Extract GPS coordinates
+                    coordinates = self.metadata_extractor.extract_gps_coordinates(file_path)
+                    
+                    if coordinates:
+                        # Reverse geocode coordinates
+                        location = self.geocoder.reverse_geocode(*coordinates)
+                        
+                        if location:
+                            country, state = location
+                            folder_key = f"{country}/{state}"
+                        else:
+                            country, state = "Unknown", "Unknown"
+                            folder_key = "Unknown"
+                    else:
+                        country, state = "Unknown", "Unknown"
+                        folder_key = "Unknown"
+                    
+                    # Update folder structure
+                    if folder_key not in folder_structure:
+                        folder_structure[folder_key] = []
+                    folder_structure[folder_key].append(file_path)
+                    total_files += 1
+                    
+                except Exception as e:
+                    self.log.error(f"Error analyzing {file_path}: {e}")
+            
+            # Display the plan
+            print(f"\nTotal files to process: {total_files}")
+            print(f"Folders that will be created: {len(folder_structure)}")
+            print("\nFolder Structure:")
+            print("-" * 40)
+            
+            for folder, files in sorted(folder_structure.items()):
+                print(f"{folder}/ ({len(files)} files)")
+                for file_path in files[:3]:  # Show first 3 files as examples
+                    filename = Path(file_path).name
+                    print(f"  - {filename}")
+                if len(files) > 3:
+                    print(f"  ... and {len(files) - 3} more files")
+                print()
+            
+            print("="*60)
+            return True
+            
+        except Exception as e:
+            self.log.error(f"Error during planning: {e}")
+            return False
     
     def process_files(self, source_dir: str, dest_dir: str, operation: str) -> bool:
         """
@@ -207,26 +300,33 @@ class MediaOrganizer:
         """
         try:
             # Get user input
-            source_dir, dest_dir, operation = self.get_user_input()
+            source_dir, dest_dir, operation, mode = self.get_user_input()
             
             # Confirm operation
             print(f"\nSummary:")
             print(f"Source: {source_dir}")
             print(f"Destination: {dest_dir}")
             print(f"Operation: {operation}")
+            print(f"Mode: {mode}")
             
             confirm = input("\nProceed? (y/n): ").strip().lower()
             if confirm not in ['y', 'yes']:
                 print("Operation cancelled.")
                 return True
             
-            # Process files
-            success = self.process_files(source_dir, dest_dir, operation)
-            
-            if success:
-                print("\nOperation completed successfully!")
-            else:
-                print("\nOperation completed with some errors. Check the log for details.")
+            # Execute based on mode
+            if mode == "plan":
+                success = self.plan_organization(source_dir, dest_dir)
+                if success:
+                    print("\nPlanning completed successfully!")
+                else:
+                    print("\nPlanning completed with some errors. Check the log for details.")
+            else:  # execute mode
+                success = self.process_files(source_dir, dest_dir, operation)
+                if success:
+                    print("\nOperation completed successfully!")
+                else:
+                    print("\nOperation completed with some errors. Check the log for details.")
             
             return success
             

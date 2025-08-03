@@ -80,6 +80,9 @@ The application will prompt you for:
 1. **Source Directory**: Path to the directory containing your media files
 2. **Destination Directory**: Path where organized files will be placed
 3. **Operation Type**: Choose between 'copy' or 'move'
+4. **Mode**: Choose between 'plan' or 'execute'
+   - **Plan**: Shows the folder structure and file counts without performing any operations
+   - **Execute**: Performs the actual copy/move operations
 
 ### Example Workflow
 
@@ -95,14 +98,37 @@ Files without GPS data will be placed in Unknown folder.
 Enter source directory path: /path/to/photos
 Enter destination directory path: /path/to/organized_photos
 Operation type (copy/move): copy
+Mode (plan/execute): plan
 
 Summary:
 Source: /path/to/photos
 Destination: /path/to/organized_photos
 Operation: copy
+Mode: plan
 
 Proceed? (y/n): y
 ```
+
+### Plan Mode
+
+When you choose "plan" mode, the application will:
+- Scan all media files in the source directory
+- Extract GPS metadata and perform reverse geocoding
+- Display a detailed plan showing:
+  - Total number of files to process
+  - Number of folders that will be created
+  - Folder structure with file counts
+  - Sample filenames for each folder
+- No files are actually moved or copied
+
+This allows you to preview the organization structure before committing to the operation.
+
+### Execute Mode
+
+When you choose "execute" mode, the application will:
+- Perform the same analysis as plan mode
+- Actually copy or move files to their organized locations
+- Provide detailed logging of all operations
 
 ### Output Structure
 
