@@ -89,7 +89,7 @@ MEDIA ORGANIZER
 ============================================================
 This tool organizes media files by GPS location.
 Files will be organized into Country/State folders based on GPS data.
-Files without GPS data will be placed in Unknown/Unknown folder.
+Files without GPS data will be placed in Unknown folder.
 ============================================================
 
 Enter source directory path: /path/to/photos
@@ -120,8 +120,7 @@ destination_directory/
 │   └── Ontario/
 │       └── photo3.jpg
 └── Unknown/
-    └── Unknown/
-        └── photo4.jpg
+    └── photo4.jpg
 ```
 
 ## Project Structure
@@ -168,8 +167,8 @@ The application uses OpenStreetMap's Nominatim service for reverse geocoding. Th
 
 The application includes comprehensive error handling:
 
-- **Missing GPS Data**: Files without GPS coordinates are placed in `Unknown/Unknown`
-- **Geocoding Failures**: Coordinates that can't be geocoded are placed in `Unknown/Unknown`
+- **Missing GPS Data**: Files without GPS coordinates are placed in `Unknown`
+- **Geocoding Failures**: Coordinates that can't be geocoded are placed in `Unknown`
 - **File Operation Failures**: Failed operations are logged with detailed error messages
 - **Network Issues**: Geocoding failures due to network issues are handled gracefully
 

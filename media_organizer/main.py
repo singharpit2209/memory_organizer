@@ -140,9 +140,9 @@ class MediaOrganizer:
             
             # Log GPS-related summary
             if no_gps_files > 0:
-                self.log.info(f"Files without GPS data (moved to Unknown/Unknown): {no_gps_files}")
+                self.log.info(f"Files without GPS data (moved to Unknown): {no_gps_files}")
             if geocoding_failed_files > 0:
-                self.log.info(f"Files with GPS data but geocoding failed (moved to Unknown/Unknown): {geocoding_failed_files}")
+                self.log.info(f"Files with GPS data but geocoding failed (moved to Unknown): {geocoding_failed_files}")
             
             return failed_operations == 0
             

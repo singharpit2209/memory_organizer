@@ -47,7 +47,11 @@ class FileOrganizer:
         safe_country = self._sanitize_filename(country)
         safe_state = self._sanitize_filename(state)
         
-        location_path = self.destination_root / safe_country / safe_state
+        # Special handling for Unknown location - create single Unknown folder
+        if safe_country == "Unknown" and safe_state == "Unknown":
+            location_path = self.destination_root / "Unknown"
+        else:
+            location_path = self.destination_root / safe_country / safe_state
         
         try:
             location_path.mkdir(parents=True, exist_ok=True)
