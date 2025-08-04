@@ -53,7 +53,7 @@ class MediaOrganizer:
         print("MEDIA ORGANIZER")
         print("="*60)
         print("This tool organizes media files by GPS location.")
-        print("Files will be organized into Country/State/City folders based on GPS data.")
+        print("Files will be organized into Country/State/City or Country/State folders based on your preference.")
         print("Files without GPS data will be placed in Unknown folder.")
         print("="*60)
         
@@ -95,6 +95,17 @@ class MediaOrganizer:
             else:
                 print("Error: Please enter 'plan' or 'execute'.")
         
+        # Get folder structure preference
+        while True:
+            folder_structure = input("Folder structure (state/city, default city): ").strip().lower()
+            if not folder_structure:
+                folder_structure = "city"  # Default to city-level organization
+                break
+            elif folder_structure in ['state', 'city']:
+                break
+            else:
+                print("Error: Please enter 'state' or 'city'.")
+        
         # Get concurrent processing option (only for execute mode)
         max_workers = 16  # Increased default for better performance
         if mode == "execute":
@@ -111,22 +122,23 @@ class MediaOrganizer:
                 except ValueError:
                     print("Error: Please enter a valid number.")
         
-        return source_dir, dest_dir, operation, mode, max_workers
+        return source_dir, dest_dir, operation, mode, max_workers, folder_structure
     
-    def plan_organization(self, source_dir: str, dest_dir: str) -> bool:
+    def plan_organization(self, source_dir: str, dest_dir: str, folder_structure: str = "city") -> bool:
         """
         Plan the organization of media files without actually moving/copying them.
         
         Args:
             source_dir: Source directory path
             dest_dir: Destination directory path
+            folder_structure: "state" for Country/State or "city" for Country/State/City
             
         Returns:
             True if successful, False otherwise
         """
         try:
             # Initialize file organizer
-            self.file_organizer = FileOrganizer(dest_dir)
+            self.file_organizer = FileOrganizer(dest_dir, folder_structure)
             
             # Scan for media files
             self.log.info(f"Scanning directory: {source_dir}")
@@ -160,7 +172,7 @@ class MediaOrganizer:
             self.log.info(f"Files likely without GPS data: {len(files_without_gps)}")
             
             # Dictionary to track folder structure and file counts
-            folder_structure = {}
+            folder_plan = {}
             total_files = 0
             
             print("\n" + "="*60)
@@ -180,16 +192,16 @@ class MediaOrganizer:
                         coordinates_data.append((file_path, coordinates))
                     else:
                         # File without GPS data goes to Unknown
-                        if "Unknown" not in folder_structure:
-                            folder_structure["Unknown"] = []
-                        folder_structure["Unknown"].append(file_path)
+                        if "Unknown" not in folder_plan:
+                            folder_plan["Unknown"] = []
+                        folder_plan["Unknown"].append(file_path)
                         total_files += 1
                 except Exception as e:
                     self.log.error(f"Error extracting GPS from {file_path}: {e}")
                     # Add to Unknown folder
-                    if "Unknown" not in folder_structure:
-                        folder_structure["Unknown"] = []
-                    folder_structure["Unknown"].append(file_path)
+                    if "Unknown" not in folder_plan:
+                        folder_plan["Unknown"] = []
+                    folder_plan["Unknown"].append(file_path)
                     total_files += 1
                 
                 if progress_bar:
@@ -214,9 +226,9 @@ class MediaOrganizer:
                         geocoding_results = {}
                         # All files will go to Unknown folder
                         for file_path, coordinates in coordinates_data:
-                            if "Unknown" not in folder_structure:
-                                folder_structure["Unknown"] = []
-                            folder_structure["Unknown"].append(file_path)
+                            if "Unknown" not in folder_plan:
+                                folder_plan["Unknown"] = []
+                            folder_plan["Unknown"].append(file_path)
                             total_files += 1
                     else:
                             # Try geocoding with timeout (cross-platform)
@@ -261,23 +273,26 @@ class MediaOrganizer:
                                                 location = geocoding_results.get(coordinates)
                                                 if location:
                                                     country, state, city = location
-                                                    folder_key = f"{country}/{state}/{city}"
+                                                    if folder_structure == "state":
+                                                        folder_key = f"{country}/{state}"
+                                                    else:
+                                                        folder_key = f"{country}/{state}/{city}"
                                                 else:
                                                     folder_key = "Unknown"
                                             else:
                                                 folder_key = "Unknown"
                                             
-                                            if folder_key not in folder_structure:
-                                                folder_structure[folder_key] = []
-                                            folder_structure[folder_key].append(file_path)
+                                            if folder_key not in folder_plan:
+                                                folder_plan[folder_key] = []
+                                            folder_plan[folder_key].append(file_path)
                                             total_files += 1
                                     except Exception as e:
                                         self.log.error(f"Even sample geocoding failed: {e} - using fast mode")
                                         # All files will go to Unknown folder
                                         for file_path, coordinates in coordinates_data:
-                                            if "Unknown" not in folder_structure:
-                                                folder_structure["Unknown"] = []
-                                            folder_structure["Unknown"].append(file_path)
+                                            if "Unknown" not in folder_plan:
+                                                folder_plan["Unknown"] = []
+                                            folder_plan["Unknown"].append(file_path)
                                             total_files += 1
                                 elif geocoding_error:
                                     self.log.error(f"Geocoding failed: {geocoding_error} - trying with larger batch")
@@ -297,23 +312,26 @@ class MediaOrganizer:
                                                 location = geocoding_results.get(coordinates)
                                                 if location:
                                                     country, state, city = location
-                                                    folder_key = f"{country}/{state}/{city}"
+                                                    if folder_structure == "state":
+                                                        folder_key = f"{country}/{state}"
+                                                    else:
+                                                        folder_key = f"{country}/{state}/{city}"
                                                 else:
                                                     folder_key = "Unknown"
                                             else:
                                                 folder_key = "Unknown"
                                             
-                                            if folder_key not in folder_structure:
-                                                folder_structure[folder_key] = []
-                                            folder_structure[folder_key].append(file_path)
+                                            if folder_key not in folder_plan:
+                                                folder_plan[folder_key] = []
+                                            folder_plan[folder_key].append(file_path)
                                             total_files += 1
                                     except Exception as e:
                                         self.log.error(f"Even sample geocoding failed: {e} - using fast mode")
                                         # All files will go to Unknown folder
                                         for file_path, coordinates in coordinates_data:
-                                            if "Unknown" not in folder_structure:
-                                                folder_structure["Unknown"] = []
-                                            folder_structure["Unknown"].append(file_path)
+                                            if "Unknown" not in folder_plan:
+                                                folder_plan["Unknown"] = []
+                                            folder_plan["Unknown"].append(file_path)
                                             total_files += 1
                                 
                             except Exception as e:
@@ -321,9 +339,9 @@ class MediaOrganizer:
                                 geocoding_results = {}
                                 # All files will go to Unknown folder
                                 for file_path, coordinates in coordinates_data:
-                                    if "Unknown" not in folder_structure:
-                                        folder_structure["Unknown"] = []
-                                    folder_structure["Unknown"].append(file_path)
+                                    if "Unknown" not in folder_plan:
+                                        folder_plan["Unknown"] = []
+                                    folder_plan["Unknown"].append(file_path)
                                     total_files += 1
                 else:
                     # For smaller datasets, proceed normally
@@ -337,15 +355,18 @@ class MediaOrganizer:
                     
                     if location:
                         country, state, city = location
-                        folder_key = f"{country}/{state}/{city}"
+                        if folder_structure == "state":
+                            folder_key = f"{country}/{state}"
+                        else:
+                            folder_key = f"{country}/{state}/{city}"
                     else:
                         country, state, city = "Unknown", "Unknown", "Unknown"
                         folder_key = "Unknown"
                     
                     # Update folder structure
-                    if folder_key not in folder_structure:
-                        folder_structure[folder_key] = []
-                    folder_structure[folder_key].append(file_path)
+                    if folder_key not in folder_plan:
+                        folder_plan[folder_key] = []
+                    folder_plan[folder_key].append(file_path)
                     total_files += 1
                     
                     if progress_bar:
@@ -356,18 +377,18 @@ class MediaOrganizer:
             
             # Add files without GPS data to Unknown folder
             if files_without_gps:
-                if "Unknown" not in folder_structure:
-                    folder_structure["Unknown"] = []
-                folder_structure["Unknown"].extend(files_without_gps)
+                if "Unknown" not in folder_plan:
+                    folder_plan["Unknown"] = []
+                folder_plan["Unknown"].extend(files_without_gps)
                 total_files += len(files_without_gps)
             
             # Display the plan
             print(f"\nTotal files to process: {total_files}")
-            print(f"Folders that will be created: {len(folder_structure)}")
+            print(f"Folders that will be created: {len(folder_plan)}")
             print("\nFolder Structure:")
             print("-" * 40)
             
-            for folder, files in sorted(folder_structure.items()):
+            for folder, files in sorted(folder_plan.items()):
                 print(f"{folder}/ ({len(files)} files)")
                 for file_path in files[:3]:  # Show first 3 files as examples
                     filename = Path(file_path).name
@@ -391,7 +412,7 @@ class MediaOrganizer:
             self.log.error(f"Error during planning: {e}")
             return False
     
-    def process_files(self, source_dir: str, dest_dir: str, operation: str) -> bool:
+    def process_files(self, source_dir: str, dest_dir: str, operation: str, folder_structure: str = "city") -> bool:
         """
         Process all media files in the source directory.
         
@@ -399,13 +420,14 @@ class MediaOrganizer:
             source_dir: Source directory path
             dest_dir: Destination directory path
             operation: Operation type ('copy' or 'move')
+            folder_structure: "state" for Country/State or "city" for Country/State/City
             
         Returns:
             True if successful, False otherwise
         """
         try:
             # Initialize file organizer
-            self.file_organizer = FileOrganizer(dest_dir)
+            self.file_organizer = FileOrganizer(dest_dir, folder_structure)
             
             # Scan for media files
             self.log.info(f"Scanning directory: {source_dir}")
@@ -864,7 +886,7 @@ class MediaOrganizer:
         """
         try:
             # Get user input
-            source_dir, dest_dir, operation, mode, max_workers = self.get_user_input()
+            source_dir, dest_dir, operation, mode, max_workers, folder_structure = self.get_user_input()
             
             # Update max_workers for this session
             self.max_workers = max_workers
@@ -875,6 +897,7 @@ class MediaOrganizer:
             print(f"Destination: {dest_dir}")
             print(f"Operation: {operation}")
             print(f"Mode: {mode}")
+            print(f"Folder structure: {folder_structure}")
             if mode == "execute":
                 print(f"Concurrent workers: {max_workers}")
             
@@ -885,13 +908,13 @@ class MediaOrganizer:
             
             # Execute based on mode
             if mode == "plan":
-                success = self.plan_organization(source_dir, dest_dir)
+                success = self.plan_organization(source_dir, dest_dir, folder_structure)
                 if success:
                     print("\nPlanning completed successfully!")
                 else:
                     print("\nPlanning completed with some errors. Check the log for details.")
             else:  # execute mode
-                success = self.process_files(source_dir, dest_dir, operation)
+                success = self.process_files(source_dir, dest_dir, operation, folder_structure)
                 if success:
                     print("\nOperation completed successfully!")
                 else:

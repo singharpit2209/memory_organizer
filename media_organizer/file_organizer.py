@@ -18,15 +18,17 @@ class FileOrganizer:
     and creating directory structures for media files.
     """
     
-    def __init__(self, destination_root: str):
+    def __init__(self, destination_root: str, folder_structure: str = "city"):
         """
         Initialize the file organizer.
         
         Args:
             destination_root: Root directory for organized files
+            folder_structure: "state" for Country/State or "city" for Country/State/City
         """
         self.logger = logging.getLogger(__name__)
         self.destination_root = Path(destination_root)
+        self.folder_structure = folder_structure
         
         # Cache for created directories to avoid repeated mkdir calls
         self._directory_cache = {}
@@ -55,8 +57,11 @@ class FileOrganizer:
         safe_state = self._sanitize_filename(state)
         safe_city = self._sanitize_filename(city)
         
-        # Create cache key
-        cache_key = f"{safe_country}:{safe_state}:{safe_city}"
+        # Create cache key based on folder structure
+        if self.folder_structure == "state":
+            cache_key = f"{safe_country}:{safe_state}"
+        else:
+            cache_key = f"{safe_country}:{safe_state}:{safe_city}"
         
         # Check cache first
         if cache_key in self._directory_cache:
@@ -66,7 +71,13 @@ class FileOrganizer:
         if safe_country == "Unknown" and safe_state == "Unknown" and safe_city == "Unknown":
             location_path = self.destination_root / "Unknown"
         else:
-            location_path = self.destination_root / safe_country / safe_state / safe_city
+            # Create directory structure based on user preference
+            if self.folder_structure == "state":
+                # Country/State structure
+                location_path = self.destination_root / safe_country / safe_state
+            else:
+                # Country/State/City structure (default)
+                location_path = self.destination_root / safe_country / safe_state / safe_city
         
         try:
             location_path.mkdir(parents=True, exist_ok=True)
