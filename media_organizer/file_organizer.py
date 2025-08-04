@@ -268,8 +268,203 @@ class FileOrganizer:
         for char in invalid_chars:
             filename = filename.replace(char, '_')
         
+        # For common Hindi names, provide English equivalents
+        hindi_mappings = {
+            'नई दिल्ली': 'New Delhi',
+            'मुंबई': 'Mumbai',
+            'कोलकाता': 'Kolkata',
+            'चेन्नई': 'Chennai',
+            'बैंगलोर': 'Bangalore',
+            'हैदराबाद': 'Hyderabad',
+            'अहमदाबाद': 'Ahmedabad',
+            'पुणे': 'Pune',
+            'जयपुर': 'Jaipur',
+            'लखनऊ': 'Lucknow',
+            'कानपुर': 'Kanpur',
+            'नागपुर': 'Nagpur',
+            'इंदौर': 'Indore',
+            'थाणे': 'Thane',
+            'भोपाल': 'Bhopal',
+            'विशाखापत्तनम': 'Visakhapatnam',
+            'पटना': 'Patna',
+            'वडोदरा': 'Vadodara',
+            'घाटकोपर': 'Ghatkopar',
+            'लुधियाना': 'Ludhiana',
+            'आगरा': 'Agra',
+            'नाशिक': 'Nashik',
+            'फरीदाबाद': 'Faridabad',
+            'मेरठ': 'Meerut',
+            'राजकोट': 'Rajkot',
+            'कलकत्ता': 'Kolkata',
+            'मद्रास': 'Chennai',
+            'बॉम्बे': 'Mumbai',
+            'दिल्ली': 'Delhi',
+            'महाराष्ट्र': 'Maharashtra',
+            'पश्चिम बंगाल': 'West Bengal',
+            'तमिलनाडु': 'Tamil Nadu',
+            'कर्नाटक': 'Karnataka',
+            'उत्तर प्रदेश': 'Uttar Pradesh',
+            'मध्य प्रदेश': 'Madhya Pradesh',
+            'गुजरात': 'Gujarat',
+            'राजस्थान': 'Rajasthan',
+            'पंजाब': 'Punjab',
+            'हरियाणा': 'Haryana',
+            'बिहार': 'Bihar',
+            'झारखंड': 'Jharkhand',
+            'ओडिशा': 'Odisha',
+            'छत्तीसगढ़': 'Chhattisgarh',
+            'तेलंगाना': 'Telangana',
+            'आंध्र प्रदेश': 'Andhra Pradesh',
+            'केरल': 'Kerala',
+            'गोवा': 'Goa',
+        }
+        
+        # For common Arabic names, provide English equivalents
+        arabic_mappings = {
+            # Qatar cities and country
+            'الدوحة': 'Doha',
+            'الوكرة': 'Al Wakrah',
+            'الخور': 'Al Khor',
+            'الريان': 'Al Rayyan',
+            'أم صلال': 'Umm Salal',
+            'الظعاين': 'Al Daayen',
+            'الشحانية': 'Al Shamal',
+            'قطر': 'Qatar',
+            # UAE cities and country
+            'دبي': 'Dubai',
+            'أبو ظبي': 'Abu Dhabi',
+            'الشارقة': 'Sharjah',
+            'العين': 'Al Ain',
+            'أم القيوين': 'Umm Al Quwain',
+            'رأس الخيمة': 'Ras Al Khaimah',
+            'الفجيرة': 'Fujairah',
+            'عجمان': 'Ajman',
+            'الإمارات': 'United Arab Emirates',
+            # Kuwait cities and country
+            'الكويت': 'Kuwait City',
+            'حولي': 'Hawally',
+            'الجهراء': 'Al Jahra',
+            'مبارك الكبير': 'Mubarak Al Kabeer',
+            'الأحمدي': 'Al Ahmadi',
+            'الفروانية': 'Al Farwaniyah',
+            # Bahrain cities and country
+            'المنامة': 'Manama',
+            'المحرق': 'Muharraq',
+            'الرفاع': 'Riffa',
+            'مدينة عيسى': 'Isa Town',
+            'مدينة حمد': 'Hamad Town',
+            'الدراز': 'Dar Kulaib',
+            'البحرين': 'Bahrain',
+            # Oman cities and country
+            'مسقط': 'Muscat',
+            'صلالة': 'Salalah',
+            'صحار': 'Sohar',
+            'نزوى': 'Nizwa',
+            'البريمي': 'Al Buraimi',
+            'صور': 'Sur',
+            'عمان': 'Oman',
+            # Jordan cities and country
+            'عمان': 'Amman',
+            'إربد': 'Irbid',
+            'الزرقاء': 'Zarqa',
+            'العقبة': 'Aqaba',
+            'السلط': 'Salt',
+            'الكرك': 'Karak',
+            'الأردن': 'Jordan',
+            # Lebanon cities and country
+            'بيروت': 'Beirut',
+            'طرابلس': 'Tripoli',
+            'صيدا': 'Sidon',
+            'بعلبك': 'Baalbek',
+            'جبيل': 'Byblos',
+            'زحلة': 'Zahle',
+            'لبنان': 'Lebanon',
+            # Syria cities and country
+            'دمشق': 'Damascus',
+            'حلب': 'Aleppo',
+            'حمص': 'Homs',
+            'حماة': 'Hama',
+            'اللاذقية': 'Latakia',
+            'دير الزور': 'Deir ez-Zor',
+            'سوريا': 'Syria',
+            # Iraq cities and country
+            'بغداد': 'Baghdad',
+            'البصرة': 'Basra',
+            'الموصل': 'Mosul',
+            'أربيل': 'Erbil',
+            'السليمانية': 'Sulaymaniyah',
+            'النجف': 'Najaf',
+            'العراق': 'Iraq',
+            # Yemen cities and country
+            'صنعاء': 'Sanaa',
+            'عدن': 'Aden',
+            'تعز': 'Taiz',
+            'الحديدة': 'Al Hudaydah',
+            'إب': 'Ibb',
+            'ذمار': 'Dhamar',
+            'اليمن': 'Yemen',
+            # Saudi cities and country
+            'الرياض': 'Riyadh',
+            'جدة': 'Jeddah',
+            'مكة': 'Makkah',
+            'المدينة': 'Madinah',
+            'الدمام': 'Dammam',
+            'الخبر': 'Khobar',
+            'الظهران': 'Dhahran',
+            'تبوك': 'Tabuk',
+            'حائل': 'Hail',
+            'بريدة': 'Buraidah',
+            'الطائف': 'Taif',
+            'أبها': 'Abha',
+            'جازان': 'Jazan',
+            'نجران': 'Najran',
+            'الجوف': 'Jouf',
+            'السعودية': 'Saudi Arabia',
+            # Egypt
+            'مصر': 'Egypt',
+            'القاهرة': 'Cairo',
+            'الإسكندرية': 'Alexandria',
+            'الأقصر': 'Luxor',
+            'أسوان': 'Aswan',
+            'شرم الشيخ': 'Sharm El Sheikh',
+        }
+        
+        # First, try to find a mapping for the original name (trim whitespace first)
+        trimmed_filename = filename.strip()
+        if trimmed_filename in hindi_mappings:
+            filename = hindi_mappings[trimmed_filename]
+        elif trimmed_filename in arabic_mappings:
+            filename = arabic_mappings[trimmed_filename]
+        else:
+            # Handle non-ASCII characters by transliterating to ASCII
+            original_filename = filename  # Keep original for fallback
+            try:
+                import unicodedata
+                # Normalize unicode characters and try to convert to ASCII
+                filename = unicodedata.normalize('NFKD', filename)
+                # Try to encode as ASCII, replace non-ASCII with closest ASCII equivalent
+                filename = filename.encode('ascii', 'ignore').decode('ascii')
+            except ImportError:
+                # If unicodedata is not available, just remove non-ASCII characters
+                filename = ''.join(char for char in filename if ord(char) < 128)
+            
+            # If the result is empty after ASCII conversion, try to preserve the original meaning
+            if not filename.strip():
+                # Try to find a mapping for the original name (trim whitespace first)
+                trimmed_original = original_filename.strip()
+                if trimmed_original in hindi_mappings:
+                    filename = hindi_mappings[trimmed_original]
+                elif trimmed_original in arabic_mappings:
+                    filename = arabic_mappings[trimmed_original]
+                else:
+                    filename = "Location"
+        
         # Remove leading/trailing spaces and dots
         filename = filename.strip('. ')
+        
+        # Replace multiple spaces with single space
+        import re
+        filename = re.sub(r'\s+', ' ', filename)
         
         # Limit length
         if len(filename) > 100:

@@ -288,6 +288,150 @@ class Geocoder:
             # Normalize city names to English
             city = self._normalize_city_name(city)
             
+            # Special handling for cases where state is Unknown but we can infer it from city
+            if state == "Unknown" and city:
+                if city == "New Delhi" and country == "India":
+                    state = "Delhi"
+                elif city == "Mumbai" and country == "India":
+                    state = "Maharashtra"
+                elif city == "Kolkata" and country == "India":
+                    state = "West Bengal"
+                elif city == "Chennai" and country == "India":
+                    state = "Tamil Nadu"
+                elif city == "Bangalore" and country == "India":
+                    state = "Karnataka"
+                elif city == "Hyderabad" and country == "India":
+                    state = "Telangana"
+                elif city == "Ahmedabad" and country == "India":
+                    state = "Gujarat"
+                elif city == "Pune" and country == "India":
+                    state = "Maharashtra"
+                elif city == "Jaipur" and country == "India":
+                    state = "Rajasthan"
+                elif city == "Lucknow" and country == "India":
+                    state = "Uttar Pradesh"
+                elif city == "Kanpur" and country == "India":
+                    state = "Uttar Pradesh"
+                elif city == "Nagpur" and country == "India":
+                    state = "Maharashtra"
+                elif city == "Indore" and country == "India":
+                    state = "Madhya Pradesh"
+                elif city == "Thane" and country == "India":
+                    state = "Maharashtra"
+                elif city == "Bhopal" and country == "India":
+                    state = "Madhya Pradesh"
+                elif city == "Visakhapatnam" and country == "India":
+                    state = "Andhra Pradesh"
+                elif city == "Patna" and country == "India":
+                    state = "Bihar"
+                elif city == "Vadodara" and country == "India":
+                    state = "Gujarat"
+                elif city == "Ludhiana" and country == "India":
+                    state = "Punjab"
+                elif city == "Agra" and country == "India":
+                    state = "Uttar Pradesh"
+                elif city == "Nashik" and country == "India":
+                    state = "Maharashtra"
+                elif city == "Faridabad" and country == "India":
+                    state = "Haryana"
+                elif city == "Meerut" and country == "India":
+                    state = "Uttar Pradesh"
+                elif city == "Rajkot" and country == "India":
+                    state = "Gujarat"
+                # Qatar cities
+                elif city == "Doha" and country == "Qatar":
+                    state = "Doha"
+                elif city == "Al Wakrah" and country == "Qatar":
+                    state = "Al Wakrah"
+                elif city == "Al Khor" and country == "Qatar":
+                    state = "Al Khor"
+                elif city == "Al Rayyan" and country == "Qatar":
+                    state = "Al Rayyan"
+                elif city == "Umm Salal" and country == "Qatar":
+                    state = "Umm Salal"
+                elif city == "Al Daayen" and country == "Qatar":
+                    state = "Al Daayen"
+                elif city == "Al Shamal" and country == "Qatar":
+                    state = "Al Shamal"
+                # UAE cities
+                elif city == "Dubai" and country == "United Arab Emirates":
+                    state = "Dubai"
+                elif city == "Abu Dhabi" and country == "United Arab Emirates":
+                    state = "Abu Dhabi"
+                elif city == "Sharjah" and country == "United Arab Emirates":
+                    state = "Sharjah"
+                elif city == "Al Ain" and country == "United Arab Emirates":
+                    state = "Al Ain"
+                elif city == "Umm Al Quwain" and country == "United Arab Emirates":
+                    state = "Umm Al Quwain"
+                elif city == "Ras Al Khaimah" and country == "United Arab Emirates":
+                    state = "Ras Al Khaimah"
+                elif city == "Fujairah" and country == "United Arab Emirates":
+                    state = "Fujairah"
+                elif city == "Ajman" and country == "United Arab Emirates":
+                    state = "Ajman"
+                # Kuwait cities
+                elif city == "Kuwait City" and country == "Kuwait":
+                    state = "Kuwait"
+                elif city == "Hawally" and country == "Kuwait":
+                    state = "Hawally"
+                elif city == "Al Jahra" and country == "Kuwait":
+                    state = "Al Jahra"
+                elif city == "Mubarak Al Kabeer" and country == "Kuwait":
+                    state = "Mubarak Al Kabeer"
+                elif city == "Al Ahmadi" and country == "Kuwait":
+                    state = "Al Ahmadi"
+                elif city == "Al Farwaniyah" and country == "Kuwait":
+                    state = "Al Farwaniyah"
+                # Bahrain cities
+                elif city == "Manama" and country == "Bahrain":
+                    state = "Manama"
+                elif city == "Muharraq" and country == "Bahrain":
+                    state = "Muharraq"
+                elif city == "Riffa" and country == "Bahrain":
+                    state = "Riffa"
+                elif city == "Isa Town" and country == "Bahrain":
+                    state = "Isa Town"
+                elif city == "Hamad Town" and country == "Bahrain":
+                    state = "Hamad Town"
+                elif city == "Dar Kulaib" and country == "Bahrain":
+                    state = "Dar Kulaib"
+                # Oman cities
+                elif city == "Muscat" and country == "Oman":
+                    state = "Muscat"
+                elif city == "Salalah" and country == "Oman":
+                    state = "Salalah"
+                elif city == "Sohar" and country == "Oman":
+                    state = "Sohar"
+                elif city == "Nizwa" and country == "Oman":
+                    state = "Nizwa"
+                elif city == "Al Buraimi" and country == "Oman":
+                    state = "Al Buraimi"
+                elif city == "Sur" and country == "Oman":
+                    state = "Sur"
+                # Thailand cities
+                elif city == "Bangkok" and country == "Thailand":
+                    state = "Bangkok"
+                elif city == "Chiang Mai" and country == "Thailand":
+                    state = "Chiang Mai"
+                elif city == "Phuket" and country == "Thailand":
+                    state = "Phuket"
+                elif city == "Pattaya" and country == "Thailand":
+                    state = "Chonburi"
+                elif city == "Hat Yai" and country == "Thailand":
+                    state = "Songkhla"
+                elif city == "Nakhon Ratchasima" and country == "Thailand":
+                    state = "Nakhon Ratchasima"
+                elif city == "Udon Thani" and country == "Thailand":
+                    state = "Udon Thani"
+                elif city == "Khon Kaen" and country == "Thailand":
+                    state = "Khon Kaen"
+                elif city == "Nakhon Si Thammarat" and country == "Thailand":
+                    state = "Nakhon Si Thammarat"
+                elif city == "Ubon Ratchathani" and country == "Thailand":
+                    state = "Ubon Ratchathani"
+                # Add more city-state mappings as needed
+            
             if country and state and city:
                 return (country, state, city)
                 
@@ -409,6 +553,44 @@ class Geocoder:
         """
         # Dictionary of common state name mappings
         state_mappings = {
+            # Indian states (Hindi/Devanagari)
+            'दिल्ली': 'Delhi',
+            'महाराष्ट्र': 'Maharashtra',
+            'पश्चिम बंगाल': 'West Bengal',
+            'तमिलनाडु': 'Tamil Nadu',
+            'कर्नाटक': 'Karnataka',
+            'तेलंगाना': 'Telangana',
+            'आंध्र प्रदेश': 'Andhra Pradesh',
+            'गुजरात': 'Gujarat',
+            'राजस्थान': 'Rajasthan',
+            'उत्तर प्रदेश': 'Uttar Pradesh',
+            'मध्य प्रदेश': 'Madhya Pradesh',
+            'बिहार': 'Bihar',
+            'ओडिशा': 'Odisha',
+            'पंजाब': 'Punjab',
+            'हरियाणा': 'Haryana',
+            'झारखंड': 'Jharkhand',
+            'छत्तीसगढ़': 'Chhattisgarh',
+            'असम': 'Assam',
+            'केरल': 'Kerala',
+            'उत्तराखंड': 'Uttarakhand',
+            'हिमाचल प्रदेश': 'Himachal Pradesh',
+            'त्रिपुरा': 'Tripura',
+            'मणिपुर': 'Manipur',
+            'मेघालय': 'Meghalaya',
+            'नगालैंड': 'Nagaland',
+            'अरुणाचल प्रदेश': 'Arunachal Pradesh',
+            'मिजोरम': 'Mizoram',
+            'सिक्किम': 'Sikkim',
+            'गोवा': 'Goa',
+            'दादरा और नगर हवेली': 'Dadra and Nagar Haveli',
+            'दमन और दीव': 'Daman and Diu',
+            'लक्षद्वीप': 'Lakshadweep',
+            'अंडमान और निकोबार द्वीप समूह': 'Andaman and Nicobar Islands',
+            'चंडीगढ़': 'Chandigarh',
+            'जम्मू और कश्मीर': 'Jammu and Kashmir',
+            'लद्दाख': 'Ladakh',
+            
             # Thai provinces
             'จังหวัดชลบุรี': 'Chonburi',
             'จังหวัดกรุงเทพมหานคร': 'Bangkok',
@@ -460,6 +642,85 @@ class Geocoder:
             'จังหวัดยโสธร': 'Yasothon',
             'จังหวัดชัยภูมิ': 'Chaiyaphum',
             'จังหวัดอำนาจเจริญ': 'Amnat Charoen',
+            
+            # Arabic states/provinces
+            'الدوحة': 'Doha',
+            'الوكرة': 'Al Wakrah',
+            'الخور': 'Al Khor',
+            'الريان': 'Al Rayyan',
+            'أم صلال': 'Umm Salal',
+            'الظعاين': 'Al Daayen',
+            'الشحانية': 'Al Shamal',
+            'دبي': 'Dubai',
+            'أبو ظبي': 'Abu Dhabi',
+            'الشارقة': 'Sharjah',
+            'العين': 'Al Ain',
+            'أم القيوين': 'Umm Al Quwain',
+            'رأس الخيمة': 'Ras Al Khaimah',
+            'الفجيرة': 'Fujairah',
+            'عجمان': 'Ajman',
+            'حولي': 'Hawally',
+            'الجهراء': 'Al Jahra',
+            'مبارك الكبير': 'Mubarak Al Kabeer',
+            'الأحمدي': 'Al Ahmadi',
+            'الفروانية': 'Al Farwaniyah',
+            'المنامة': 'Manama',
+            'المحرق': 'Muharraq',
+            'الرفاع': 'Riffa',
+            'مدينة عيسى': 'Isa Town',
+            'مدينة حمد': 'Hamad Town',
+            'الدراز': 'Dar Kulaib',
+            'مسقط': 'Muscat',
+            'صلالة': 'Salalah',
+            'صحار': 'Sohar',
+            'نزوى': 'Nizwa',
+            'البريمي': 'Al Buraimi',
+            'صور': 'Sur',
+            'إربد': 'Irbid',
+            'الزرقاء': 'Zarqa',
+            'العقبة': 'Aqaba',
+            'السلط': 'Salt',
+            'الكرك': 'Karak',
+            'طرابلس': 'Tripoli',
+            'صيدا': 'Sidon',
+            'بعلبك': 'Baalbek',
+            'جبيل': 'Byblos',
+            'زحلة': 'Zahle',
+            'حلب': 'Aleppo',
+            'حمص': 'Homs',
+            'حماة': 'Hama',
+            'اللاذقية': 'Latakia',
+            'دير الزور': 'Deir ez-Zor',
+            'البصرة': 'Basra',
+            'الموصل': 'Mosul',
+            'أربيل': 'Erbil',
+            'السليمانية': 'Sulaymaniyah',
+            'النجف': 'Najaf',
+            'عدن': 'Aden',
+            'تعز': 'Taiz',
+            'الحديدة': 'Al Hudaydah',
+            'إب': 'Ibb',
+            'ذمار': 'Dhamar',
+            'الرياض': 'Riyadh',
+            'جدة': 'Jeddah',
+            'مكة': 'Makkah',
+            'المدينة': 'Madinah',
+            'الدمام': 'Dammam',
+            'الخبر': 'Khobar',
+            'الظهران': 'Dhahran',
+            'تبوك': 'Tabuk',
+            'حائل': 'Hail',
+            'بريدة': 'Buraidah',
+            'الطائف': 'Taif',
+            'أبها': 'Abha',
+            'جازان': 'Jazan',
+            'نجران': 'Najran',
+            'الجوف': 'Jouf',
+            'القاهرة': 'Cairo',
+            'الإسكندرية': 'Alexandria',
+            'الأقصر': 'Luxor',
+            'أسوان': 'Aswan',
+            'شرم الشيخ': 'Sharm El Sheikh',
             'จังหวัดหนองบัวลำภู': 'Nong Bua Lamphu',
             'จังหวัดขอนแก่น': 'Khon Kaen',
             'จังหวัดอุดรธานี': 'Udon Thani',
@@ -653,6 +914,36 @@ class Geocoder:
         """
         # Dictionary of common city name mappings
         city_mappings = {
+            # Indian cities (Hindi/Devanagari)
+            'नई दिल्ली': 'New Delhi',
+            'मुंबई': 'Mumbai',
+            'कोलकाता': 'Kolkata',
+            'चेन्नई': 'Chennai',
+            'बैंगलोर': 'Bangalore',
+            'हैदराबाद': 'Hyderabad',
+            'अहमदाबाद': 'Ahmedabad',
+            'पुणे': 'Pune',
+            'जयपुर': 'Jaipur',
+            'लखनऊ': 'Lucknow',
+            'कानपुर': 'Kanpur',
+            'नागपुर': 'Nagpur',
+            'इंदौर': 'Indore',
+            'थाणे': 'Thane',
+            'भोपाल': 'Bhopal',
+            'विशाखापत्तनम': 'Visakhapatnam',
+            'पटना': 'Patna',
+            'वडोदरा': 'Vadodara',
+            'घाटकोपर': 'Ghatkopar',
+            'लुधियाना': 'Ludhiana',
+            'आगरा': 'Agra',
+            'नाशिक': 'Nashik',
+            'फरीदाबाद': 'Faridabad',
+            'मेरठ': 'Meerut',
+            'राजकोट': 'Rajkot',
+            'कलकत्ता': 'Kolkata',
+            'मद्रास': 'Chennai',
+            'बॉम्बे': 'Mumbai',
+            
             # Thai cities
             'กรุงเทพมหานคร': 'Bangkok',
             'เชียงใหม่': 'Chiang Mai',
@@ -742,6 +1033,79 @@ class Geocoder:
             'جازان': 'Jazan',
             'نجران': 'Najran',
             'الجوف': 'Jouf',
+            # Qatar cities
+            'الدوحة': 'Doha',
+            'الوكرة': 'Al Wakrah',
+            'الخور': 'Al Khor',
+            'الريان': 'Al Rayyan',
+            'أم صلال': 'Umm Salal',
+            'الظعاين': 'Al Daayen',
+            'الشحانية': 'Al Shamal',
+            # UAE cities
+            'دبي': 'Dubai',
+            'أبو ظبي': 'Abu Dhabi',
+            'الشارقة': 'Sharjah',
+            'العين': 'Al Ain',
+            'أم القيوين': 'Umm Al Quwain',
+            'رأس الخيمة': 'Ras Al Khaimah',
+            'الفجيرة': 'Fujairah',
+            'عجمان': 'Ajman',
+            # Kuwait cities
+            'الكويت': 'Kuwait City',
+            'حولي': 'Hawally',
+            'الجهراء': 'Al Jahra',
+            'مبارك الكبير': 'Mubarak Al Kabeer',
+            'الأحمدي': 'Al Ahmadi',
+            'الفروانية': 'Al Farwaniyah',
+            # Bahrain cities
+            'المنامة': 'Manama',
+            'المحرق': 'Muharraq',
+            'الرفاع': 'Riffa',
+            'مدينة عيسى': 'Isa Town',
+            'مدينة حمد': 'Hamad Town',
+            'الدراز': 'Dar Kulaib',
+            # Oman cities
+            'مسقط': 'Muscat',
+            'صلالة': 'Salalah',
+            'صحار': 'Sohar',
+            'نزوى': 'Nizwa',
+            'البريمي': 'Al Buraimi',
+            'صور': 'Sur',
+            # Jordan cities
+            'عمان': 'Amman',
+            'إربد': 'Irbid',
+            'الزرقاء': 'Zarqa',
+            'العقبة': 'Aqaba',
+            'السلط': 'Salt',
+            'الكرك': 'Karak',
+            # Lebanon cities
+            'بيروت': 'Beirut',
+            'طرابلس': 'Tripoli',
+            'صيدا': 'Sidon',
+            'بعلبك': 'Baalbek',
+            'جبيل': 'Byblos',
+            'زحلة': 'Zahle',
+            # Syria cities
+            'دمشق': 'Damascus',
+            'حلب': 'Aleppo',
+            'حمص': 'Homs',
+            'حماة': 'Hama',
+            'اللاذقية': 'Latakia',
+            'دير الزور': 'Deir ez-Zor',
+            # Iraq cities
+            'بغداد': 'Baghdad',
+            'البصرة': 'Basra',
+            'الموصل': 'Mosul',
+            'أربيل': 'Erbil',
+            'السليمانية': 'Sulaymaniyah',
+            'النجف': 'Najaf',
+            # Yemen cities
+            'صنعاء': 'Sanaa',
+            'عدن': 'Aden',
+            'تعز': 'Taiz',
+            'الحديدة': 'Al Hudaydah',
+            'إب': 'Ibb',
+            'ذمار': 'Dhamar',
         }
         
         # Return normalized name if found, otherwise return original
