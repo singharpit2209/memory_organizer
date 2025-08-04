@@ -35,13 +35,14 @@ class FileOrganizer:
         self.destination_root.mkdir(parents=True, exist_ok=True)
         self.logger.info(f"Destination root: {self.destination_root}")
     
-    def create_location_directory(self, country: str, state: str) -> Path:
+    def create_location_directory(self, country: str, state: str, city: str) -> Path:
         """
         Create directory structure for a specific location.
         
         Args:
             country: Country name
             state: State/province name
+            city: City name
             
         Returns:
             Path to the created directory
@@ -49,19 +50,20 @@ class FileOrganizer:
         # Clean directory names for filesystem compatibility
         safe_country = self._sanitize_filename(country)
         safe_state = self._sanitize_filename(state)
+        safe_city = self._sanitize_filename(city)
         
         # Create cache key
-        cache_key = f"{safe_country}:{safe_state}"
+        cache_key = f"{safe_country}:{safe_state}:{safe_city}"
         
         # Check cache first
         if cache_key in self._directory_cache:
             return self._directory_cache[cache_key]
         
         # Special handling for Unknown location - create single Unknown folder
-        if safe_country == "Unknown" and safe_state == "Unknown":
+        if safe_country == "Unknown" and safe_state == "Unknown" and safe_city == "Unknown":
             location_path = self.destination_root / "Unknown"
         else:
-            location_path = self.destination_root / safe_country / safe_state
+            location_path = self.destination_root / safe_country / safe_state / safe_city
         
         try:
             location_path.mkdir(parents=True, exist_ok=True)
@@ -72,7 +74,7 @@ class FileOrganizer:
         except Exception as e:
             self.logger.error(f"Failed to create directory {location_path}: {e}")
             # Fallback to Unknown directory
-            return self.create_location_directory("Unknown", "Unknown")
+            return self.create_location_directory("Unknown", "Unknown", "Unknown")
     
     def get_directory_cache_stats(self) -> Dict[str, int]:
         """
@@ -162,7 +164,7 @@ class FileOrganizer:
             self.logger.error(f"Failed to move {source_path}: {e}")
             return False
     
-    def organize_file(self, source_path: str, country: str, state: str, 
+    def organize_file(self, source_path: str, country: str, state: str, city: str,
                      operation: str = "copy") -> bool:
         """
         Organize a file into the appropriate location directory.
@@ -171,6 +173,7 @@ class FileOrganizer:
             source_path: Source file path
             country: Country name
             state: State/province name
+            city: City name
             operation: "copy" or "move"
             
         Returns:
@@ -178,7 +181,7 @@ class FileOrganizer:
         """
         try:
             # Create the location directory
-            location_dir = self.create_location_directory(country, state)
+            location_dir = self.create_location_directory(country, state, city)
             
             # Perform the file operation
             if operation.lower() == "move":

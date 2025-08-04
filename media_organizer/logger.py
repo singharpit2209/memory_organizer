@@ -152,8 +152,8 @@ class Logger:
             logger.info(f"GPS found in {file_path}: ({lat:.6f}, {lon:.6f})")
             
             if location:
-                country, state = location
-                logger.info(f"Location: {country}, {state}")
+                country, state, city = location
+                logger.info(f"Location: {country}, {state}, {city}")
             else:
                 logger.warning(f"Could not geocode coordinates for {file_path}")
         else:

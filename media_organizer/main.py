@@ -53,7 +53,7 @@ class MediaOrganizer:
         print("MEDIA ORGANIZER")
         print("="*60)
         print("This tool organizes media files by GPS location.")
-        print("Files will be organized into Country/State folders based on GPS data.")
+        print("Files will be organized into Country/State/City folders based on GPS data.")
         print("Files without GPS data will be placed in Unknown folder.")
         print("="*60)
         
@@ -260,8 +260,8 @@ class MediaOrganizer:
                                             if coordinates in geocoding_results:
                                                 location = geocoding_results.get(coordinates)
                                                 if location:
-                                                    country, state = location
-                                                    folder_key = f"{country}/{state}"
+                                                    country, state, city = location
+                                                    folder_key = f"{country}/{state}/{city}"
                                                 else:
                                                     folder_key = "Unknown"
                                             else:
@@ -296,8 +296,8 @@ class MediaOrganizer:
                                             if coordinates in geocoding_results:
                                                 location = geocoding_results.get(coordinates)
                                                 if location:
-                                                    country, state = location
-                                                    folder_key = f"{country}/{state}"
+                                                    country, state, city = location
+                                                    folder_key = f"{country}/{state}/{city}"
                                                 else:
                                                     folder_key = "Unknown"
                                             else:
@@ -336,10 +336,10 @@ class MediaOrganizer:
                     location = geocoding_results.get(coordinates)
                     
                     if location:
-                        country, state = location
-                        folder_key = f"{country}/{state}"
+                        country, state, city = location
+                        folder_key = f"{country}/{state}/{city}"
                     else:
-                        country, state = "Unknown", "Unknown"
+                        country, state, city = "Unknown", "Unknown", "Unknown"
                         folder_key = "Unknown"
                     
                     # Update folder structure
@@ -455,22 +455,12 @@ class MediaOrganizer:
                         if coordinates:
                             coordinates_data.append((file_path, coordinates))
                         else:
-                            # File without GPS data goes to Unknown
-                            success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", operation)
-                            if success:
-                                successful_operations += 1
-                                no_gps_files += 1
-                            else:
-                                failed_operations += 1
+                            # File without GPS data - will be handled after geocoding
+                            coordinates_data.append((file_path, None))
                     except Exception as e:
                         self.log.error(f"Error extracting GPS from {file_path}: {e}")
-                        # Add to Unknown folder
-                        success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", operation)
-                        if success:
-                            successful_operations += 1
-                            no_gps_files += 1
-                        else:
-                            failed_operations += 1
+                        # File with error - will be handled after geocoding
+                        coordinates_data.append((file_path, None))
                     
                     if progress_bar:
                         progress_bar.update(1)
@@ -480,8 +470,11 @@ class MediaOrganizer:
                 
                 # Batch geocode all coordinates with timeout
                 if coordinates_data:
-                    self.log.info(f"Batch geocoding {len(coordinates_data)} coordinates...")
-                    all_coordinates = [coords for _, coords in coordinates_data]
+                    # Filter out None coordinates for geocoding
+                    valid_coordinates_data = [(file_path, coords) for file_path, coords in coordinates_data if coords is not None]
+                    all_coordinates = [coords for _, coords in valid_coordinates_data]
+                    
+                    self.log.info(f"Batch geocoding {len(valid_coordinates_data)} coordinates...")
                     
                     # For large datasets, offer a fast mode that skips geocoding
                     if len(coordinates_data) > 1000:
@@ -494,7 +487,7 @@ class MediaOrganizer:
                             geocoding_results = {}
                             # All files will go to Unknown folder
                             for file_path, coordinates in coordinates_data:
-                                success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", operation)
+                                success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", "Unknown", operation)
                                 if success:
                                     successful_operations += 1
                                     no_gps_files += 1
@@ -542,13 +535,13 @@ class MediaOrganizer:
                                             if coordinates in geocoding_results:
                                                 location = geocoding_results.get(coordinates)
                                                 if location:
-                                                    country, state = location
-                                                    success = self.file_organizer.organize_file(file_path, country, state, operation)
+                                                    country, state, city = location
+                                                    success = self.file_organizer.organize_file(file_path, country, state, city, operation)
                                                 else:
-                                                    success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", operation)
+                                                    success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", "Unknown", operation)
                                             else:
                                                 # Coordinate not in sample, go to Unknown
-                                                success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", operation)
+                                                success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", "Unknown", operation)
                                             
                                             if success:
                                                 successful_operations += 1
@@ -562,7 +555,7 @@ class MediaOrganizer:
                                         self.log.error(f"Even sample geocoding failed: {e} - using fast mode")
                                         # All files will go to Unknown folder
                                         for file_path, coordinates in coordinates_data:
-                                            success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", operation)
+                                            success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", "Unknown", operation)
                                             if success:
                                                 successful_operations += 1
                                                 no_gps_files += 1
@@ -585,13 +578,13 @@ class MediaOrganizer:
                                             if coordinates in geocoding_results:
                                                 location = geocoding_results.get(coordinates)
                                                 if location:
-                                                    country, state = location
-                                                    success = self.file_organizer.organize_file(file_path, country, state, operation)
+                                                    country, state, city = location
+                                                    success = self.file_organizer.organize_file(file_path, country, state, city, operation)
                                                 else:
-                                                    success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", operation)
+                                                    success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", "Unknown", operation)
                                             else:
                                                 # Coordinate not in sample, go to Unknown
-                                                success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", operation)
+                                                success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", "Unknown", operation)
                                             
                                             if success:
                                                 successful_operations += 1
@@ -605,7 +598,7 @@ class MediaOrganizer:
                                         self.log.error(f"Even sample geocoding failed: {e} - using fast mode")
                                         # All files will go to Unknown folder
                                         for file_path, coordinates in coordinates_data:
-                                            success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", operation)
+                                            success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", "Unknown", operation)
                                             if success:
                                                 successful_operations += 1
                                                 no_gps_files += 1
@@ -617,7 +610,7 @@ class MediaOrganizer:
                                 geocoding_results = {}
                                 # All files will go to Unknown folder
                                 for file_path, coordinates in coordinates_data:
-                                    success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", operation)
+                                    success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", "Unknown", operation)
                                     if success:
                                         successful_operations += 1
                                         no_gps_files += 1
@@ -632,10 +625,16 @@ class MediaOrganizer:
                     
                     with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
                         # Submit all file operations
-                        future_to_file = {
-                            executor.submit(self._process_file_with_location, file_path, coordinates, geocoding_results, operation): file_path 
-                            for file_path, coordinates in coordinates_data
-                        }
+                        future_to_file = {}
+                        for file_path, coordinates in coordinates_data:
+                            if coordinates is None:
+                                # File without GPS data - process directly
+                                future = executor.submit(self._process_file_without_gps, file_path, operation)
+                                future_to_file[future] = file_path
+                            else:
+                                # File with GPS data - process with geocoding results
+                                future = executor.submit(self._process_file_with_location, file_path, coordinates, geocoding_results, operation)
+                                future_to_file[future] = file_path
                         
                         # Process completed tasks with progress bar
                         progress_bar = self.logger.create_progress_bar(len(coordinates_data), "Processing files with GPS data")
@@ -648,6 +647,8 @@ class MediaOrganizer:
                                     successful_operations += 1
                                     if gps_status == "geocoding_failed":
                                         geocoding_failed_files += 1
+                                    elif gps_status == "no_gps":
+                                        no_gps_files += 1
                                 else:
                                     failed_operations += 1
                             except Exception as e:
@@ -668,7 +669,7 @@ class MediaOrganizer:
                 
                 for file_path in files_without_gps:
                     try:
-                        success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", operation)
+                        success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", "Unknown", operation)
                         if success:
                             successful_operations += 1
                             no_gps_files += 1
@@ -709,6 +710,25 @@ class MediaOrganizer:
             self.log.error(f"Error during file processing: {e}")
             return False
     
+    def _process_file_without_gps(self, file_path: str, operation: str) -> tuple:
+        """
+        Process a single media file without GPS data.
+        
+        Args:
+            file_path: Path to the media file
+            operation: Operation type ('copy' or 'move')
+            
+        Returns:
+            Tuple of (success, gps_status) where gps_status is "no_gps"
+        """
+        try:
+            # File without GPS data goes to Unknown
+            success = self.file_organizer.organize_file(file_path, "Unknown", "Unknown", "Unknown", operation)
+            return success, "no_gps"
+        except Exception as e:
+            self.log.error(f"Error processing {file_path}: {e}")
+            return False, "error"
+    
     def _process_file_with_location(self, file_path: str, coordinates: tuple, geocoding_results: dict, operation: str) -> tuple:
         """
         Process a single media file with pre-geocoded location data.
@@ -729,18 +749,18 @@ class MediaOrganizer:
             location = geocoding_results.get(coordinates)
             
             if location:
-                country, state = location
+                country, state, city = location
                 self.logger.log_gps_extraction(file_path, coordinates, location)
                 gps_status = "success"
             else:
-                country, state = "Unknown", "Unknown"
+                country, state, city = "Unknown", "Unknown", "Unknown"
                 self.logger.log_gps_extraction(file_path, coordinates, None)
                 self.log.info(f"File not moved - Geocoding failed: {file_path}")
                 gps_status = "geocoding_failed"
             
             # Organize the file
             success = self.file_organizer.organize_file(
-                file_path, country, state, operation
+                file_path, country, state, city, operation
             )
             
             return success, gps_status
@@ -802,23 +822,23 @@ class MediaOrganizer:
                 location = self.geocoder.reverse_geocode(*coordinates)
                 
                 if location:
-                    country, state = location
+                    country, state, city = location
                     self.logger.log_gps_extraction(file_path, coordinates, location)
                     gps_status = "success"
                 else:
-                    country, state = "Unknown", "Unknown"
+                    country, state, city = "Unknown", "Unknown", "Unknown"
                     self.logger.log_gps_extraction(file_path, coordinates, None)
                     self.log.info(f"File not moved - Geocoding failed: {file_path}")
                     gps_status = "geocoding_failed"
             else:
-                country, state = "Unknown", "Unknown"
+                country, state, city = "Unknown", "Unknown", "Unknown"
                 self.logger.log_gps_extraction(file_path, None, None)
                 self.log.info(f"File not moved - No GPS data found: {file_path}")
                 gps_status = "no_gps"
             
             # Organize the file
             success = self.file_organizer.organize_file(
-                file_path, country, state, operation
+                file_path, country, state, city, operation
             )
             
             return success, gps_status

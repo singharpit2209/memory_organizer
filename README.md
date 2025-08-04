@@ -1,13 +1,13 @@
 # Media Organizer
 
-A Python tool for organizing media files by GPS location. This application extracts GPS metadata from images and videos, reverse geocodes the coordinates to obtain country and state information, and organizes files into a structured directory hierarchy.
+A Python tool for organizing media files by GPS location. This application extracts GPS metadata from images and videos, reverse geocodes the coordinates to obtain country, state, and city information, and organizes files into a structured directory hierarchy.
 
 ## Features
 
 - **GPS Metadata Extraction**: Extracts GPS coordinates from various image formats (JPEG, PNG, TIFF, etc.) and video formats
 - **Advanced Video GPS**: Enhanced GPS extraction from videos using hachoir and ffprobe for comprehensive metadata analysis
-- **Reverse Geocoding**: Converts GPS coordinates to country and state information using OpenStreetMap's Nominatim service
-- **File Organization**: Creates a Country/State directory structure and organizes files accordingly
+- **Reverse Geocoding**: Converts GPS coordinates to country, state, and city information using OpenStreetMap's Nominatim service
+- **File Organization**: Creates a Country/State/City directory structure and organizes files accordingly
 - **Flexible Operations**: Supports both copy and move operations
 - **Comprehensive Logging**: Detailed logging of all operations with progress tracking
 - **Error Handling**: Robust error handling with fallback mechanisms
@@ -95,7 +95,7 @@ The application will prompt you for:
 MEDIA ORGANIZER
 ============================================================
 This tool organizes media files by GPS location.
-Files will be organized into Country/State folders based on GPS data.
+Files will be organized into Country/State/City folders based on GPS data.
 Files without GPS data will be placed in Unknown folder.
 ============================================================
 

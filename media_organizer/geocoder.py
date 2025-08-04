@@ -59,16 +59,16 @@ class Geocoder:
         else:
             self.logger.error("No geocoding libraries available!")
     
-    def reverse_geocode(self, latitude: float, longitude: float) -> Optional[Tuple[str, str]]:
+    def reverse_geocode(self, latitude: float, longitude: float) -> Optional[Tuple[str, str, str]]:
         """
-        Reverse geocode GPS coordinates to country and state.
+        Reverse geocode GPS coordinates to country, state, and city.
         
         Args:
             latitude: Latitude coordinate
             longitude: Longitude coordinate
             
         Returns:
-            Tuple of (country, state) if successful, None otherwise
+            Tuple of (country, state, city) if successful, None otherwise
         """
         if not self.geolocator:
             self.logger.error("Geocoder not available")
@@ -102,7 +102,7 @@ class Geocoder:
                 location = self.geolocator.reverse((latitude, longitude))
                 
                 if location and location.raw:
-                    result = self._extract_country_state(location.raw)
+                    result = self._extract_country_state_city(location.raw)
                     # Cache the result
                     self._geocoding_cache[cache_key] = result
                     return result
@@ -128,7 +128,7 @@ class Geocoder:
         
         return None
     
-    def batch_reverse_geocode(self, coordinates: list) -> Dict[tuple, Optional[Tuple[str, str]]]:
+    def batch_reverse_geocode(self, coordinates: list) -> Dict[tuple, Optional[Tuple[str, str, str]]]:
         """
         Batch reverse geocode multiple GPS coordinates.
         
@@ -136,7 +136,7 @@ class Geocoder:
             coordinates: List of (latitude, longitude) tuples
             
         Returns:
-            Dictionary mapping coordinates to (country, state) tuples
+            Dictionary mapping coordinates to (country, state, city) tuples
         """
         results = {}
         
@@ -233,15 +233,15 @@ class Geocoder:
             'cache_size': len(self._geocoding_cache)
         }
     
-    def _extract_country_state(self, location_data: Dict[str, Any]) -> Optional[Tuple[str, str]]:
+    def _extract_country_state_city(self, location_data: Dict[str, Any]) -> Optional[Tuple[str, str, str]]:
         """
-        Extract country and state from location data.
+        Extract country, state, and city from location data.
         
         Args:
             location_data: Raw location data from geocoding service
             
         Returns:
-            Tuple of (country, state) if found, None otherwise
+            Tuple of (country, state, city) if found, None otherwise
         """
         try:
             address = location_data.get('address', {})
@@ -263,9 +263,21 @@ class Geocoder:
                 'Unknown'
             )
             
+            # Try different possible keys for city
+            city = (
+                address.get('city') or
+                address.get('town') or
+                address.get('village') or
+                address.get('municipality') or
+                address.get('suburb') or
+                address.get('district') or
+                'Unknown'
+            )
+            
             # Clean up the values
             country = self._clean_location_name(country)
             state = self._clean_location_name(state)
+            city = self._clean_location_name(city)
             
             # Normalize country names to English
             country = self._normalize_country_name(country)
@@ -273,11 +285,14 @@ class Geocoder:
             # Normalize state names to English
             state = self._normalize_state_name(state)
             
-            if country and state:
-                return (country, state)
+            # Normalize city names to English
+            city = self._normalize_city_name(city)
+            
+            if country and state and city:
+                return (country, state, city)
                 
         except Exception as e:
-            self.logger.error(f"Error extracting country/state from location data: {e}")
+            self.logger.error(f"Error extracting country/state/city from location data: {e}")
         
         return None
     
@@ -624,4 +639,110 @@ class Geocoder:
         }
         
         # Return normalized name if found, otherwise return original
-        return state_mappings.get(state, state) 
+        return state_mappings.get(state, state)
+    
+    def _normalize_city_name(self, city: str) -> str:
+        """
+        Normalize city names to English equivalents.
+        
+        Args:
+            city: City name (potentially in native language)
+            
+        Returns:
+            Normalized city name in English
+        """
+        # Dictionary of common city name mappings
+        city_mappings = {
+            # Thai cities
+            'กรุงเทพมหานคร': 'Bangkok',
+            'เชียงใหม่': 'Chiang Mai',
+            'ภูเก็ต': 'Phuket',
+            'พัทยา': 'Pattaya',
+            'หาดใหญ่': 'Hat Yai',
+            'นครราชสีมา': 'Nakhon Ratchasima',
+            'ขอนแก่น': 'Khon Kaen',
+            'อุบลราชธานี': 'Ubon Ratchathani',
+            'นครศรีธรรมราช': 'Nakhon Si Thammarat',
+            'สงขลา': 'Songkhla',
+            
+            # Chinese cities
+            '北京': 'Beijing',
+            '上海': 'Shanghai',
+            '广州': 'Guangzhou',
+            '深圳': 'Shenzhen',
+            '天津': 'Tianjin',
+            '重庆': 'Chongqing',
+            '成都': 'Chengdu',
+            '杭州': 'Hangzhou',
+            '南京': 'Nanjing',
+            '武汉': 'Wuhan',
+            '西安': 'Xian',
+            '青岛': 'Qingdao',
+            '大连': 'Dalian',
+            '厦门': 'Xiamen',
+            '苏州': 'Suzhou',
+            '无锡': 'Wuxi',
+            '宁波': 'Ningbo',
+            '长沙': 'Changsha',
+            '郑州': 'Zhengzhou',
+            '济南': 'Jinan',
+            
+            # Japanese cities
+            '東京': 'Tokyo',
+            '大阪': 'Osaka',
+            '京都': 'Kyoto',
+            '横浜': 'Yokohama',
+            '名古屋': 'Nagoya',
+            '神戸': 'Kobe',
+            '福岡': 'Fukuoka',
+            '札幌': 'Sapporo',
+            '仙台': 'Sendai',
+            '広島': 'Hiroshima',
+            '岡山': 'Okayama',
+            '金沢': 'Kanazawa',
+            '奈良': 'Nara',
+            '鎌倉': 'Kamakura',
+            '箱根': 'Hakone',
+            
+            # Korean cities
+            '서울': 'Seoul',
+            '부산': 'Busan',
+            '대구': 'Daegu',
+            '인천': 'Incheon',
+            '광주': 'Gwangju',
+            '대전': 'Daejeon',
+            '울산': 'Ulsan',
+            '수원': 'Suwon',
+            '창원': 'Changwon',
+            '고양': 'Goyang',
+            '용인': 'Yongin',
+            '성남': 'Seongnam',
+            '부천': 'Bucheon',
+            '안산': 'Ansan',
+            '전주': 'Jeonju',
+            '청주': 'Cheongju',
+            '포항': 'Pohang',
+            '춘천': 'Chuncheon',
+            '강릉': 'Gangneung',
+            '여수': 'Yeosu',
+            
+            # Arabic cities
+            'الرياض': 'Riyadh',
+            'جدة': 'Jeddah',
+            'مكة': 'Makkah',
+            'المدينة': 'Madinah',
+            'الدمام': 'Dammam',
+            'الخبر': 'Khobar',
+            'الظهران': 'Dhahran',
+            'تبوك': 'Tabuk',
+            'حائل': 'Hail',
+            'بريدة': 'Buraidah',
+            'الطائف': 'Taif',
+            'أبها': 'Abha',
+            'جازان': 'Jazan',
+            'نجران': 'Najran',
+            'الجوف': 'Jouf',
+        }
+        
+        # Return normalized name if found, otherwise return original
+        return city_mappings.get(city, city) 

@@ -124,18 +124,11 @@ class MetadataExtractor:
                     with Image.open(file_path) as img:
                         exif_data = img._getexif()
                         if exif_data:
-                            # Check if GPS coordinates are actually present
-                            gps_info = {}
+                            # Check if GPSInfo tag exists (less strict check)
                             for tag_id, value in exif_data.items():
                                 tag = TAGS.get(tag_id, tag_id)
                                 if tag == "GPSInfo":
-                                    for gps_tag_id, gps_value in value.items():
-                                        gps_tag = GPSTAGS.get(gps_tag_id, gps_tag_id)
-                                        gps_info[gps_tag] = gps_value
-                            
-                            # Only return True if we have actual coordinates
-                            if 'GPSLatitude' in gps_info and 'GPSLongitude' in gps_info:
-                                return True
+                                    return True
                             return False
                 
                 # Fallback check with exifread
@@ -144,7 +137,8 @@ class MetadataExtractor:
                         tags = exifread.process_file(f, details=False)
                         return any('GPS' in tag for tag in tags.keys())
                 
-                return True  # Assume it might have GPS data
+                # If we can't check with exifread, assume it might have GPS data
+                return True
                 
             except Exception:
                 return False
@@ -196,8 +190,8 @@ class MetadataExtractor:
                 except Exception:
                     pass
                 
-                # If we can't check, be conservative and assume no GPS data
-                return False
+                # If we can't check, be more optimistic and assume it might have GPS data
+                return True
                 
             except Exception:
                 return False
