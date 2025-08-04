@@ -88,7 +88,8 @@ class Logger:
         return logging.getLogger(name)
     
     def log_operation_summary(self, total_files: int, processed_files: int, 
-                            successful_operations: int, failed_operations: int):
+                            successful_operations: int, failed_operations: int, 
+                            skipped_files: int = 0):
         """
         Log a summary of file operations.
         
@@ -97,6 +98,7 @@ class Logger:
             processed_files: Number of files processed
             successful_operations: Number of successful operations
             failed_operations: Number of failed operations
+            skipped_files: Number of files skipped during operations
         """
         logger = logging.getLogger(__name__)
         
@@ -107,6 +109,7 @@ class Logger:
         logger.info(f"Files processed: {processed_files}")
         logger.info(f"Successful operations: {successful_operations}")
         logger.info(f"Failed operations: {failed_operations}")
+        logger.info(f"Files skipped during copy/move operations: {skipped_files}")
         
         if processed_files > 0:
             success_rate = (successful_operations / processed_files) * 100
@@ -158,6 +161,20 @@ class Logger:
                 logger.warning(f"Could not geocode coordinates for {file_path}")
         else:
             logger.debug(f"No GPS data found in {file_path}")
+    
+    def log_skipped_files_summary(self, skipped_count: int):
+        """
+        Log a summary of skipped files.
+        
+        Args:
+            skipped_count: Number of files that were skipped
+        """
+        logger = logging.getLogger(__name__)
+        
+        if skipped_count > 0:
+            logger.info(f"Total files skipped during copy/move operations: {skipped_count}")
+        else:
+            logger.info("No files were skipped during copy/move operations")
     
     def log_progress(self, current: int, total: int, operation: str = "Processing"):
         """

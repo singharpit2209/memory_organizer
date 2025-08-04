@@ -380,6 +380,10 @@ class MediaOrganizer:
             cache_stats = self.geocoder.get_cache_stats()
             print(f"Geocoding cache: {cache_stats['cache_hits']} hits, {cache_stats['cache_misses']} misses ({cache_stats['hit_rate_percent']}% hit rate)")
             
+            # Note about skipped files (during planning, we can't know exact count)
+            print("\nNote: During execution, files that already exist in the destination")
+            print("with identical content will be skipped to avoid duplicates.")
+            
             print("="*60)
             return True
             
@@ -685,10 +689,14 @@ class MediaOrganizer:
                 if progress_bar:
                     progress_bar.close()
             
+            # Get skipped files count
+            skipped_files_count = self.file_organizer.get_skipped_files_count()
+            
             # Log summary
             self.logger.log_operation_summary(
                 len(media_files), len(media_files), 
-                successful_operations, failed_operations
+                successful_operations, failed_operations,
+                skipped_files_count
             )
             
             # Log GPS-related summary

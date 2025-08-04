@@ -31,6 +31,9 @@ class FileOrganizer:
         # Cache for created directories to avoid repeated mkdir calls
         self._directory_cache = {}
         
+        # Counter for skipped files
+        self.skipped_files_count = 0
+        
         # Ensure destination root exists
         self.destination_root.mkdir(parents=True, exist_ok=True)
         self.logger.info(f"Destination root: {self.destination_root}")
@@ -88,6 +91,24 @@ class FileOrganizer:
             'cache_keys': list(self._directory_cache.keys())
         }
     
+    def get_skipped_files_count(self) -> int:
+        """
+        Get the total number of files that were skipped during operations.
+        
+        Returns:
+            Number of skipped files
+        """
+        return self.skipped_files_count
+    
+    def log_skipped_files_summary(self):
+        """
+        Log a summary of skipped files.
+        """
+        if self.skipped_files_count > 0:
+            self.logger.info(f"Total files skipped during copy/move operations: {self.skipped_files_count}")
+        else:
+            self.logger.info("No files were skipped during copy/move operations")
+    
     def copy_file(self, source_path: str, destination_path: Path) -> bool:
         """
         Copy a file to the destination.
@@ -113,8 +134,10 @@ class FileOrganizer:
                 # Check if files are identical
                 if self._files_are_identical(source_file, dest_file):
                     self.logger.info(f"Skipped (identical file): {source_path} -> {dest_file}")
+                    self.skipped_files_count += 1
                 else:
                     self.logger.info(f"Skipped (file exists with different content): {source_path} -> {dest_file}")
+                    self.skipped_files_count += 1
                 return True  # Return True since we're skipping intentionally
             
             # Copy the file
@@ -151,8 +174,10 @@ class FileOrganizer:
                 # Check if files are identical
                 if self._files_are_identical(source_file, dest_file):
                     self.logger.info(f"Skipped (identical file): {source_path} -> {dest_file}")
+                    self.skipped_files_count += 1
                 else:
                     self.logger.info(f"Skipped (file exists with different content): {source_path} -> {dest_file}")
+                    self.skipped_files_count += 1
                 return True  # Return True since we're skipping intentionally
             
             # Move the file
